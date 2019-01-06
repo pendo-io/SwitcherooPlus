@@ -160,6 +160,15 @@ $(document).ready(function () {
 		refreshRules();
 	});
 
+	chrome.runtime.onMessage.addListener(
+	    function(request, sender, sendResponse) {
+	        if (request.syncDataUpdated) {
+	            rules = request.rules;
+	            refreshRules();
+	        }
+	    }
+	);
+
 	$('#addRuleButton').click(function () {
 		addRule();
 	});
