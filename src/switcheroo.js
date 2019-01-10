@@ -131,7 +131,23 @@ function convertRuleToEditMode (ruleParent, editIndex, rule){
 		editRule(editIndex, updatedRule);
 	});
 
+	// respond to Enter key press in the input fields
+	$(toInput).add(fromInput).on('keydown', function(e) {
+		console.log(e.which);
+		if (e.which == 13) {
+			var updatedRule = {
+				from : fromInput.val(),
+				to : toInput.val(),
+				isActive: true,
+				isRegex : isReg.prop("checked")
+			};
+
+			editRule(editIndex, updatedRule);
+		}
+	});
+
 	ruleParent.append(editRuleDiv);
+	fromInput.focus();
 }
 
 function getRuleFromListItem(listItem){
@@ -160,6 +176,22 @@ $(document).ready(function () {
 		refreshRules();
 	});
 
+	chrome.runtime.onMessage.addListener(
+	    function(request, sender, sendResponse) {
+	        if (request.syncDataUpdated) {
+	            rules = request.rules;
+	            refreshRules();
+	        }
+	    }
+	);
+
+	// respond to Enter key press in the toInput field
+	$('#toInput').on('keydown', function(e) {
+		if (e.which == 13) {
+	    	addRule();
+		}
+	});
+
 	$('#addRuleButton').click(function () {
 		addRule();
 	});
@@ -169,7 +201,11 @@ $(document).ready(function () {
 	});
 
 	$('#exportAllRulesButton').click(function () {
-		exportRules();
+		exportRules(false);
+	});
+
+	$('#exportAllRulesButtonAsFile').click(function () {
+		exportRules(true);
 	});
 
 	$('#importAllRulesButton').click(function () {
@@ -178,6 +214,12 @@ $(document).ready(function () {
 
 	$('#importButton').click(function () {
 		importRules();
+	});
+
+	// click on textarea to copy rules to clipboard
+	$('#txtExport').click(function(){
+		$("textarea").select();
+		document.execCommand('copy');
 	});
 
 	$('#rules').delegate('.active', 'click', function () {
@@ -215,19 +257,40 @@ $(document).ready(function () {
 	$('#fromInput').focus();
 });
 
-function exportRules() {
+// generate rules file to download
+function download(text) {
+	var d = new Date();
+    var filename = "Switcheroo" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + ".txt";
+
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+function exportRules(isAsFile) {
 	chrome.extension.sendMessage({
 		getRules : true
 	}, function (response) {
 		rules = response.rules;
-		$("#txtExport").text(JSON.stringify(rules, null, 4));
-		$("#export").show();
+		sRules = JSON.stringify(rules, null, 4);
+		if (isAsFile){
+			download(sRules);
+		} else {
+			$("#txtExport").text(sRules);
+			$("#export").toggle();
+		}
 	});
-
 }
 
 function showImport() {
-	$("#import").show();
+	$("#import").toggle();
 }
 
 function importRules() {
@@ -273,6 +336,8 @@ function loadWordings() {
 	$("#removeAllRulesButton").val(chrome.i18n.getMessage("removeall"));
 	$("#exportAllRulesButton").val(chrome.i18n.getMessage("exportall"));
 	$("#importAllRulesButton").val(chrome.i18n.getMessage("importall"));
+	$("#exportAllRulesButtonAsFile").val(chrome.i18n.getMessage("exportallasfile"));
+	$("#importAllRulesButtonAsFile").val(chrome.i18n.getMessage("importallasfile"));
 	$("#toolscaption").text(chrome.i18n.getMessage("toolscaption"));
 	$("#toolsOptionsOnly").text(chrome.i18n.getMessage("toolsoptionsonly"));
 

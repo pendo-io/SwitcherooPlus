@@ -53,12 +53,20 @@
 		"message" : "remove all",
 		"description" : "button text for remove all rules"
 	},
+	"exportallasfile" : {
+		"message" : "export file",
+		"description" : "button file for the export button"
+	},
+	"importallasfile" : {
+		"message" : "import file",
+		"description" : "button file for the import button"
+	},
 	"exportall" : {
-		"message" : "export",
+		"message" : "export txt",
 		"description" : "button text for the export button"
 	},
 	"importall" : {
-		"message" : "import",
+		"message" : "import txt",
 		"description" : "button text for the import button"
 	},
 	"enabled" : {

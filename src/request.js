@@ -2,12 +2,28 @@ var
 	rules,
 	lastRequestId;
 
-if(localStorage['rules']){
-	rules = JSON.parse(localStorage['rules']);
+// helper function to synchronization local rules with rules in chrome.storage.sync
+function syncRules(){
+	chrome.storage.sync.get(['rules'], function(syncData) {
+		if (typeof syncData.rules === 'undefined') {
+			rules = [];
+		} else {
+			rules = JSON.parse(syncData.rules);
+		}
+		chrome.runtime.sendMessage({
+			syncDataUpdated : true,
+			rules : rules
+		});
+	});
 }
-else{
-	rules = [];
-}
+// sync local rules once at start
+syncRules();
+
+// sync local rules once chrome.storage.sync received update
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+	syncRules();
+});
+
 
 chrome.webRequest.onBeforeRequest.addListener(function(details) {
 	return redirectToMatchingRule(details);
@@ -101,5 +117,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 });
 
 function updateLocalStorage(rules){
-	localStorage['rules'] = JSON.stringify(rules);
+	rules_str = JSON.stringify(rules);
+	// update chrome.storage.sync rules
+	chrome.storage.sync.set({rules: rules_str}, function() {
+		console.log('Value is set to \n' + rules_str);
+	});
+	// save a local copy
+	localStorage['rules'] = rules_str;
 }
