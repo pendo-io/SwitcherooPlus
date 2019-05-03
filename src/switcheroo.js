@@ -28,7 +28,7 @@ function refreshRules() {
 	}
 }
 
-function addRule () {
+function addRule (index) {
 	var fromInput, toInput, typeDropDown;
 
 	fromInput = newRuleDiv.children('#fromInput');
@@ -42,7 +42,8 @@ function addRule () {
 	};
 
 	chrome.extension.sendMessage({
-		rule : newRule
+		addRule : newRule,
+		addRuleAt : index
 	}, function (response) {
 		rules = response.rules;
 		refreshRules();
@@ -50,6 +51,7 @@ function addRule () {
 
 	fromInput.val('');
 	toInput.val('');
+	fromInput.focus();
 }
 
 function removeAllRules () {
@@ -92,6 +94,16 @@ function removeRule (index) {
 	});
 }
 
+// pop a Rule, and insert to another place
+function moveRule (fromIndex, toIndex){
+	chrome.extension.sendMessage({
+		moveIndex : [ fromIndex, toIndex ]
+	}, function (response){
+		rules = response.rules;
+		refreshRules();
+	})
+}
+
 function convertRuleToEditMode (ruleParent, editIndex, rule){
 	ruleParent.empty();
 
@@ -129,6 +141,8 @@ function convertRuleToEditMode (ruleParent, editIndex, rule){
 		};
 
 		editRule(editIndex, updatedRule);
+		// restore sortable function when exiting edit mode
+		$('#rules').sortable({disabled: false});
 	});
 
 	// respond to Enter key press in the input fields
@@ -145,6 +159,9 @@ function convertRuleToEditMode (ruleParent, editIndex, rule){
 			editRule(editIndex, updatedRule);
 		}
 	});
+
+	// disable sortable function in editing mode
+	$('#rules').sortable({disabled : true});
 
 	ruleParent.append(editRuleDiv);
 	fromInput.focus();
@@ -214,6 +231,13 @@ $(document).ready(function () {
 
 	$('#importButton').click(function () {
 		importRules();
+	});
+
+	// enable sortable rules
+	$('#rules').sortable({
+		update : function( event, ui ){
+			moveRule(ui.item.attr('data-rule-index'), ui.item.index());
+		}
 	});
 
 	// click on textarea to copy rules to clipboard

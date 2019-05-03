@@ -1,19 +1,21 @@
 ﻿Switcheroo Redirector Plus
 
-Version 1.0.3 -> derived from Switcheroo Redirector Plus
+derived from Switcheroo Redirector Plus
 
-changes:
-- technically went back to jQuery
-- massive GUI improvements
-- ask for confirmation before deleting all rules
-- move enhanced tools to options page
-- properly focus input, use Enter key to submit rule
-- add export-rules-as-file option, enable copy to clipboard on click, add textarea toggle
+20190502:
+- rules rearranging feature
 
-new features:
+20190110:
 - syncing across Chrome browsers
 - internationalized strings
 - options page
 - regex support
 - rule import and export (as JSON)
 
+20181231:
+- technically went back to jQuery
+- massive GUI improvements
+- ask for confirmation before deleting all rules
+- move enhanced tools to options page
+- properly focus input, use Enter key to submit rule
+- add export-rules-as-file option, enable copy to clipboard on click, add textarea toggle

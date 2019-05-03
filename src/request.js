@@ -69,8 +69,12 @@ function redirectToMatchingRule(details) {
 }
 
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-	if ( typeof request.rule !== 'undefined') {
-		rules.push(request.rule);
+	if ( typeof request.addRule !== 'undefined') {
+		if (typeof request.addRuleAt !== 'undefined'){
+			rules.splice(request.addRuleAt, 0, request.addRule);
+		} else {
+			rules.push(request.addRule);
+		}
 		updateLocalStorage(rules);
 		sendResponse({
 			rules : this.rules
@@ -99,6 +103,14 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		});
 	} else if ( typeof request.removeIndex !== 'undefined') {
 		rules.splice(request.removeIndex, 1);
+		updateLocalStorage(rules);
+		sendResponse({
+			rules : this.rules
+		});
+	} else if ( typeof request.moveIndex !== 'undefined') {
+		tmp = rules[request.moveIndex[0]];
+		rules.splice(request.moveIndex[0], 1);
+		rules.splice(request.moveIndex[1], 0, tmp);
 		updateLocalStorage(rules);
 		sendResponse({
 			rules : this.rules
